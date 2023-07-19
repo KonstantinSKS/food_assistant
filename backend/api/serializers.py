@@ -5,7 +5,7 @@ from drf_extra_fields.fields import Base64ImageField
 
 from recipes.models import (Tag, Ingredient, Recipe,
                             AmountOfIngredients)
-from users.models import User
+from users.models import User, Subscription
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -63,6 +63,9 @@ class RecipeCreateOrUpdateSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(),
                                               many=True)
     image = Base64ImageField()
+    cooking_time = serializers.IntegerField(
+        validators=(MinValueValidator(1))
+    )
 
     class Meta:
         model = Recipe
@@ -76,6 +79,25 @@ class RecipeCreateOrUpdateSerializer(serializers.ModelSerializer):
             'text',
             'cooking_time',
         )
+
+    def validate_ingredients(self, ingredients):
+        if not ingredients:
+            raise serializers.ValidationError(
+                'Рецепт должен содержать минимум 1 ингредиент!'
+            )
+        for ingredient in ingredients:
+            if int(ingredient.get('amount')) < 1:
+                raise serializers.ValidationError(
+                    'Количество не может быть меньше 1 единицы!'
+                )
+        return ingredients
+
+    def validate_tags(self, tags):
+        if not tags:
+            raise serializers.ValidationError(
+                'Для рецепта нужен хотя бы один тег!'
+            )
+        return tags
 
 
 class RecipeReadOnlySerializer(serializers.ModelSerializer):
@@ -120,33 +142,26 @@ class SubscriptionSerializer(UserSerializer):
             "recipes_count",
         )
 
+    def get_is_subscribed(self, obj):
+        return (
+            self.context.get('request').user.is_authenticated
+            and Subscription.objects.filter(user=self.context['request'].user,
+                                            author=obj).exists()
+
+        )
+
     def get_recipes_count(self, obj):
         return obj.recipes.count()
-    
-    def validate(self, data):
-        user = self.context.get('request').user
 
     def validate(self, data):
         if self.context['request'].method == 'POST':
-            title_id = self.context.get('title')
-            author_id = self.context.get('author')
+            user = self.context.get('user')
+            author = self.context.get('author') # author = self.instance
             if User.objects.filter(
-                    title=title_id, author=author_id).exists():
+                    user=user, author=author).exists():
                 raise serializers.ValidationError(
-                    'Нельзя оставлять больше одного отзыва!')
-        return data
-
-    def validate(self, data):
-        email = data.get("email")
-        username = data.get("username")
-        user_email_exists = User.objects.filter(email=email).exists()
-        user_username_exists = User.objects.filter(username=username).exists()
-        if (user_email_exists
-                and not user_username_exists):
-            raise serializers.ValidationError(
-                "User with such email already exists")
-        if (not user_email_exists
-                and user_username_exists):
-            raise serializers.ValidationError(
-                "User with such username already exists")
+                    'Вы уже подписаны на этого пользователя!')
+            if user == author:
+                raise serializers.ValidationError(
+                    'Нельзя подписаться на самого себя!')
         return data
