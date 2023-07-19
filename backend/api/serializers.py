@@ -1,4 +1,4 @@
-from rest_framework import serializers
+from rest_framework import serializers, validators
 from django.core.validators import MinValueValidator
 
 from drf_extra_fields.fields import Base64ImageField
@@ -79,6 +79,12 @@ class RecipeCreateOrUpdateSerializer(serializers.ModelSerializer):
             'text',
             'cooking_time',
         )
+        validators = [
+            validators.UniqueTogetherValidator(
+                queryset=AmountOfIngredients.objects.all(),
+                fields=('recipe', 'ingredient')
+            )
+        ]
 
     def validate_ingredients(self, ingredients):
         if not ingredients:
@@ -98,6 +104,25 @@ class RecipeCreateOrUpdateSerializer(serializers.ModelSerializer):
                 'Для рецепта нужен хотя бы один тег!'
             )
         return tags
+
+    def validate_cooking_time(self, cooking_time):
+        if int(cooking_time) < 1:
+            raise serializers.ValidationError(
+                'Время приготовления меньше 1 минуты!'
+            )
+        return cooking_time
+
+    def create_AmountOfIngredients(self, ingredients, recipe):
+        ...
+
+    def create(self, validated_data):
+        ...
+
+    def update(self, instance, validated_data):
+        ...
+
+    def to_representation(self, instance):
+        ...
 
 
 class RecipeReadOnlySerializer(serializers.ModelSerializer):
