@@ -1,6 +1,6 @@
 from rest_framework import serializers, validators
 from django.core.validators import MinValueValidator
-from django.shortcuts import get_object_or_404
+# from django.shortcuts import get_object_or_404
 
 from drf_extra_fields.fields import Base64ImageField
 
@@ -134,7 +134,20 @@ class RecipeCreateOrUpdateSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
-        ...
+        if 'ingredients' in validated_data:
+            ingredients = validated_data.pop('ingredients')
+            instance.ingredients.clear()
+            self.create_ingredients(ingredients, instance)
+
+        if 'tags' in validated_data:
+            tags = validated_data.pop('tags')
+            instance.tags.clear()
+            instance.tags.set(tags)
+
+        return super().update(
+            instance, validated_data)
+        # instance.save()
+        # return instance
 
     def to_representation(self, instance):
         ...
@@ -196,7 +209,7 @@ class SubscriptionSerializer(UserSerializer):
     def validate(self, data):
         if self.context['request'].method == 'POST':
             user = self.context.get('user')
-            author = self.context.get('author') # author = self.instance
+            author = self.context.get('author')  # author = self.instance
             if User.objects.filter(
                     user=user, author=author).exists():
                 raise serializers.ValidationError(
