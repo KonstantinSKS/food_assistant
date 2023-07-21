@@ -149,16 +149,17 @@ class RecipeCreateOrUpdateSerializer(serializers.ModelSerializer):
         # instance.save()
         # return instance
 
-    def to_representation(self, instance):
-        ...
+    # def to_representation(self, instance):
 
 
 class RecipeReadOnlySerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     author = UserSerializer(read_only=True)
     ingredients = IngredientsReadOnlySerializer(many=True)
-    is_favorited = serializers.BooleanField(read_only=True)
-    is_in_shopping_cart = serializers.BooleanField(read_only=True)
+    is_favorited = serializers.SerializerMethodField()
+    # serializers.BooleanField(read_only=True)
+    is_in_shopping_cart = serializers.SerializerMethodField()
+    # serializers.BooleanField(read_only=True)
     image = Base64ImageField()
 
     class Meta:
@@ -176,6 +177,16 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
             'image',
             'cooking_time',
         )
+
+    def get_is_favorited(self, recipe):
+        user = self.context.get('request').user
+        if not user.is_anonymous:
+            return user.favorites.filter(recipe=recipe).exists()
+
+    def get_is_in_shopping_cart(self, recipe):
+        user = self.context.get('request').user
+        if not user.is_anonymous:
+            return user.shoppinglist.filter(recipe=recipe).exists()
 
 
 class SubscriptionSerializer(UserSerializer):
