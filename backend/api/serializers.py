@@ -31,7 +31,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 class IngredientsCreateOrUpdateSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     amount = serializers.IntegerField(
-        validators=(MinValueValidator(1))
+        validators=(MinValueValidator(1),)
     )
 
     class Meta:
@@ -65,7 +65,7 @@ class RecipeCreateOrUpdateSerializer(serializers.ModelSerializer):
                                               many=True)
     image = Base64ImageField()
     cooking_time = serializers.IntegerField(
-        validators=(MinValueValidator(1))
+        validators=(MinValueValidator(1),)
     )
 
     class Meta:
