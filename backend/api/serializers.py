@@ -166,6 +166,16 @@ class RecipeReadOnlySerializer(serializers.ModelSerializer):
         model = Recipe
         fields = '__all__'
 
+    def get_is_favorited(self, recipe):
+        user = self.context.get('request').user
+        if not user.is_anonymous:
+            return user.favorites.filter(recipe=recipe).exists()
+
+    def get_is_in_shopping_cart(self, recipe):
+        user = self.context.get('request').user
+        if not user.is_anonymous:
+            return user.shoppinglist.filter(recipe=recipe).exists()
+
 
 class FavoriteRecipeSerializer(serializers.ModelSerializer):
 
@@ -177,16 +187,6 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
             'image',
             'cooking_time',
         )
-
-    def get_is_favorited(self, recipe):
-        user = self.context.get('request').user
-        if not user.is_anonymous:
-            return user.favorites.filter(recipe=recipe).exists()
-
-    def get_is_in_shopping_cart(self, recipe):
-        user = self.context.get('request').user
-        if not user.is_anonymous:
-            return user.shoppinglist.filter(recipe=recipe).exists()
 
 
 class SubscriptionSerializer(UserSerializer):
