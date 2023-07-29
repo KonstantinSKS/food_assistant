@@ -52,7 +52,7 @@ class User(AbstractUser):
     def is_admin(self):
         return self.role == self.ADMIN or self.is_superuser
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.username
 
     # def __str__(self):

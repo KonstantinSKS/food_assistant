@@ -9,9 +9,53 @@ from recipes.models import (Tag, Ingredient, Recipe,
 from users.models import User, Subscription
 
 
+class SignupSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True, max_length=254)
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]',
+        max_length=150,
+        required=True,
+    )
+
+    class Meta:
+        model = User
+
+    def validate(self, data):
+        email = data.get('email')
+        username = data.get('username')
+        user_email_exists = User.objects.filter(email=email).exists()
+        user_username_exists = User.objects.filter(username=username).exists()
+        if (user_email_exists
+                and not user_username_exists):
+            raise serializers.ValidationError(
+                'User with such email already exists')
+        if (not user_email_exists
+                and user_username_exists):
+            raise serializers.ValidationError(
+                'User with such username already exists')
+        return data
+
+
 class UserSerializer(serializers.ModelSerializer):
-    ...
-# !!!!
+    is_subscribed = serializers.SerializerMethodField(read_only=True)
+# default=False
+
+    class Meta:
+        model = User
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+        )
+
+    def get_is_subscribed(self, obj):
+        return (
+            self.context.get('request').user.is_authenticated
+            and Subscription.objects.filter(user=self.context['request'].user,
+                                            author=obj).exists())
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -192,6 +236,7 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
 class SubscriptionSerializer(UserSerializer):
     recipes = FavoriteRecipeSerializer(many=True, read_only=True)
     recipes_count = serializers.SerializerMethodField()
+# Не понятно, будет ли работать этот сериализатор ?
 
     class Meta:
         model = User
