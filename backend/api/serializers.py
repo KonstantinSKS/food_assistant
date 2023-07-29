@@ -10,34 +10,28 @@ from recipes.models import (Tag, Ingredient, Recipe,
 from users.models import User, Subscription
 
 
-class SignupSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=True, max_length=254)
-    username = serializers.RegexField(
-        regex=r'^[\w.@+-]',
-        max_length=150,
-        required=True,
-    )
+class SignupSerializer(UserCreateSerializer):
 
     class Meta:
         model = User
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'password',
+        )
+        extra_kwargs = {
+            'email': {'required': True},
+            'username': {'required': True},
+            'password': {'write_only': True},
+            'first_name': {'required': True},
+            'last_name': {'required': True},
+        }
 
-    def validate(self, data):
-        email = data.get('email')
-        username = data.get('username')
-        user_email_exists = User.objects.filter(email=email).exists()
-        user_username_exists = User.objects.filter(username=username).exists()
-        if (user_email_exists
-                and not user_username_exists):
-            raise serializers.ValidationError(
-                'User with such email already exists')
-        if (not user_email_exists
-                and user_username_exists):
-            raise serializers.ValidationError(
-                'User with such username already exists')
-        return data
 
-
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(UserSerializer):
     is_subscribed = serializers.SerializerMethodField(read_only=True)
 # default=False
 
@@ -57,6 +51,11 @@ class UserSerializer(serializers.ModelSerializer):
             self.context.get('request').user.is_authenticated
             and Subscription.objects.filter(user=self.context['request'].user,
                                             author=obj).exists())
+
+
+class SetPasswordSerializer(serializers.Serializer):
+    new_password = serializers.CharField(max_length=150)
+    current_password = serializers.CharField(max_length=150)
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -257,7 +256,6 @@ class SubscriptionSerializer(UserSerializer):
             self.context.get('request').user.is_authenticated
             and Subscription.objects.filter(user=self.context['request'].user,
                                             author=obj).exists()
-
         )
 
     def get_recipes_count(self, obj):

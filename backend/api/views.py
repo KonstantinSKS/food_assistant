@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .serializers import (
-    UserSerializer, TagSerializer,
+    SignupSerializer, UserSerializer, TagSerializer,
     IngredientSerializer, IngredientsCreateOrUpdateSerializer,
     IngredientsReadOnlySerializer,
     RecipeCreateOrUpdateSerializer, RecipeReadOnlySerializer,
@@ -19,7 +19,7 @@ from users.models import User, Subscription
 from recipes.models import (Tag, Ingredient, Recipe,
                             AmountOfIngredients, Favorite, ShoppingList)
 
-from rest_framework.permissions import AllowAny # Временно!
+# from rest_framework.permissions import AllowAny # Временно!
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -28,13 +28,13 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
-    permission_classes = (AllowAny,) # IsAdminOrReadOnly
+    permission_classes = (IsAdminOrReadOnly,)
     serializer_class = TagSerializer
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
-    permission_classes = (AllowAny,) # IsAdminOrReadOnly
+    permission_classes = (IsAdminOrReadOnly,)
     serializer_class = IngredientSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = IngredientFilter
@@ -42,7 +42,7 @@ class IngredientViewSet(viewsets.ModelViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all().order_by('id')
-    permission_classes = (AllowAny,) # IsAdminOrAuthorOrReadOnly
+    permission_classes = (IsAdminOrAuthorOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     pagination_class = LimitPagesPagination
