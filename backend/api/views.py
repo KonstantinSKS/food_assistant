@@ -48,22 +48,10 @@ class UserViewSet(UserViewSet):
             permission_classes=(IsAuthenticated,))
     def set_password(self, request):
         serializer = SetPasswordSerializer(request.user, data=request.data)
-        if serializer.is_valid():
-            # Check old password
-            current_password = serializer.data.get("current_password")
-            if not self.object.check_password(current_password):
-                return Response({"current_password": ["Wrong password."]},
-                                status=status.HTTP_400_BAD_REQUEST)
-            # set_password also hashes the password that the user will get
-            self.object.set_password(serializer.data.get("new_password"))
-            self.object.save()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        #if serializer.is_valid(raise_exception=True):
-            #serializer.save()
-        #return Response({'detail': 'Пароль успешно изменен!'},
-                        #status=status.HTTP_204_NO_CONTENT)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+        return Response({'detail': 'Пароль успешно изменен!'},
+                        status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=True,

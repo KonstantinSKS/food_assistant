@@ -62,6 +62,20 @@ class SetPasswordSerializer(serializers.Serializer):
         validate_password(new_password)
         return new_password
 
+    def update(self, instance, validated_data):
+        if not instance.check_password(validated_data['current_password']):
+            raise serializers.ValidationError(
+                {'current_password': 'Введен неправильный пароль.'}
+            )
+        if (validated_data['current_password']
+           == validated_data['new_password']):
+            raise serializers.ValidationError(
+                {'new_password': 'Новый пароль должен отличаться от текущего.'}
+            )
+        instance.set_password(validated_data['new_password'])
+        instance.save()
+        return validated_data
+
 
 class TagSerializer(serializers.ModelSerializer):
 
