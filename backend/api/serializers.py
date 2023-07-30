@@ -10,7 +10,7 @@ from recipes.models import (Tag, Ingredient, Recipe,
 from users.models import User, Subscription
 
 
-class SignupSerializer(UserCreateSerializer):
+class UserCreateSerializer(UserCreateSerializer):
 
     class Meta:
         model = User
