@@ -1,5 +1,6 @@
 from rest_framework import serializers, validators
 from django.core.validators import MinValueValidator
+from django.contrib.auth.password_validation import validate_password
 # from django.shortcuts import get_object_or_404
 
 from djoser.serializers import UserSerializer, UserCreateSerializer
@@ -54,8 +55,12 @@ class UserSerializer(UserSerializer):
 
 
 class SetPasswordSerializer(serializers.Serializer):
-    new_password = serializers.CharField(max_length=150)
-    current_password = serializers.CharField(max_length=150)
+    new_password = serializers.CharField(required=True, max_length=150)
+    current_password = serializers.CharField(required=True, max_length=150)
+
+    def validate_new_password(self, new_password):
+        validate_password(new_password)
+        return new_password
 
 
 class TagSerializer(serializers.ModelSerializer):
