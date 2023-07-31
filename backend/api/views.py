@@ -2,11 +2,14 @@ from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+
 from djoser.views import UserViewSet
+
 from rest_framework import viewsets, status, exceptions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+
 from .serializers import (
     UserCreateSerializer, UserSerializer, SetPasswordSerializer, TagSerializer,
     IngredientSerializer, IngredientsCreateOrUpdateSerializer,
@@ -15,6 +18,7 @@ from .serializers import (
     FavoriteRecipeSerializer, SubscriptionSerializer)
 from .pagination import LimitPagesPagination
 from .permissions import IsAdminOrReadOnly, IsAdminOrAuthorOrReadOnly
+
 from .filters import IngredientFilter, RecipeFilter
 from users.models import User, Subscription
 from recipes.models import (Tag, Ingredient, Recipe,
@@ -110,7 +114,7 @@ class IngredientViewSet(viewsets.ModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    queryset = Recipe.objects.all().order_by('id')
+    queryset = Recipe.objects.all()
     permission_classes = (IsAdminOrAuthorOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
@@ -193,13 +197,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return response
 
 
-class AmountOfIngredientsViewSet(viewsets.ModelViewSet):
-    ...
+#class AmountOfIngredientsViewSet(viewsets.ModelViewSet):
+    #...
 
 
-class ShoppingListViewSet(viewsets.ModelViewSet):
-    ...
+#class ShoppingListViewSet(viewsets.ModelViewSet):
+    #...
 
 
-class FavoriteViewSetviewsets(viewsets.ModelViewSet):
-    ...
+#class FavoriteViewSetviewsets(viewsets.ModelViewSet):
+    #...
