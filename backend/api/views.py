@@ -8,18 +8,18 @@ from djoser.views import UserViewSet
 from rest_framework import viewsets, status, exceptions
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 
 from .serializers import (
-    UserCreateSerializer, UserSerializer, SetPasswordSerializer, TagSerializer,
+    UserCreateSerializer, UserReadOnlySerializer, SetPasswordSerializer, TagSerializer,
     IngredientSerializer, IngredientsCreateOrUpdateSerializer,
     IngredientsReadOnlySerializer,
     RecipeCreateOrUpdateSerializer, RecipeReadOnlySerializer,
     FavoriteRecipeSerializer, SubscriptionSerializer)
 from .pagination import LimitPagesPagination
 from .permissions import IsAdminOrReadOnly, IsAdminOrAuthorOrReadOnly
-
 from .filters import IngredientFilter, RecipeFilter
+from . viewsets import CreateReadViewSet
 from users.models import User, Subscription
 from recipes.models import (Tag, Ingredient, Recipe,
                             AmountOfIngredients, Favorite, ShoppingList)
@@ -27,26 +27,21 @@ from recipes.models import (Tag, Ingredient, Recipe,
 # from rest_framework.permissions import AllowAny # Временно!
 
 
-class UserViewSet(UserViewSet):
+class CustomUserViewSet(CreateReadViewSet):
     queryset = User.objects.all()
-    permission_classes = (AllowAny,)
-    pagination_class = LimitPagesPagination
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
-            return UserSerializer
+            return UserReadOnlySerializer
         return UserCreateSerializer
 
     @action(detail=False, methods=['get'],
             pagination_class=None,
             permission_classes=(IsAuthenticated,))
     def me(self, request):
-        serializer = UserSerializer(request.user, context={'request': request})
+        serializer = UserReadOnlySerializer(request.user, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
-    # def me(self, request):
-        # serializer = UserSerializer(request.user)
-        # return Response(serializer.data,
-                        # status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'],
             permission_classes=(IsAuthenticated,))
@@ -154,7 +149,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=(IsAuthenticated,))
-    def shopping_list(self, request, pk):
+    def shopping_cart(self, request, pk):
         recipe = get_object_or_404(Recipe, pk=pk)
         user = self.request.user
 
@@ -181,7 +176,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def download_shopping_cart(self, request):
         user = self.request.user
         ingredients = (AmountOfIngredients.objects.filter(
-            recipe__shoppinglist__user=request.user)  # !!!!!!!
+            recipes__shoppinglist__user=request.user)  # !!!!!!!
             .values('ingredient__name', 'ingredient__measurement_unit')  # !!!
             .annotate(amount=Sum('amount'))
         )
