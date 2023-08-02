@@ -15,7 +15,7 @@ from .serializers import (
     IngredientSerializer, IngredientsCreateOrUpdateSerializer,
     IngredientsReadOnlySerializer,
     RecipeCreateOrUpdateSerializer, RecipeReadOnlySerializer,
-    FavoriteRecipeSerializer, SubscriptionSerializer)
+    FavoriteRecipeSerializer, SubscriptionSerializer, SubscribeSerializer)
 from .pagination import LimitPagesPagination
 from .permissions import IsAdminOrReadOnly, IsAdminOrAuthorOrReadOnly
 from .filters import IngredientFilter, RecipeFilter
@@ -58,26 +58,21 @@ class CustomUserViewSet(CreateReadViewSet):
         permission_classes=[IsAuthenticated]
     )
     def subscribe(self, request, **kwargs):
-        user = request.user
-        author_id = self.kwargs.get('id')
-        author = get_object_or_404(User, id=author_id)
+        author = get_object_or_404(User, id=kwargs['pk'])
 
         if request.method == 'POST':
-            serializer = SubscriptionSerializer(
-                author,
-                data=request.data,
-                context={'request': request})
+            serializer = SubscribeSerializer(
+                author, data=request.data, context={"request": request})
             serializer.is_valid(raise_exception=True)
-            Subscription.objects.create(user=user, author=author)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            Subscription.objects.create(user=request.user, author=author)
+            return Response(serializer.data,
+                            status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
-            subscription = get_object_or_404(
-                Subscription,
-                user=user,
-                author=author)
-            subscription.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            get_object_or_404(Subscription, user=request.user,
+                              author=author).delete()
+            return Response({'detail': 'Успешная отписка!'},
+                            status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=False,
