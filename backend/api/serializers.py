@@ -1,14 +1,14 @@
-from rest_framework import serializers, validators
 from django.core.validators import MinValueValidator
 from django.contrib.auth.password_validation import validate_password
 from django.shortcuts import get_object_or_404
-# from django.shortcuts import get_object_or_404
 
 from djoser.serializers import UserSerializer, UserCreateSerializer
 from drf_extra_fields.fields import Base64ImageField
 
+from rest_framework import serializers
+
 from recipes.models import (Tag, Ingredient, Recipe,
-                            AmountOfIngredients, Favorite)
+                            AmountOfIngredients)
 from users.models import User, Subscription
 
 
@@ -50,7 +50,6 @@ class UserCreateSerializer(UserCreateSerializer):
 
 class UserReadOnlySerializer(UserSerializer):
     is_subscribed = serializers.SerializerMethodField(read_only=True)
-# default=False
 
     class Meta:
         model = User
@@ -159,12 +158,6 @@ class RecipeCreateOrUpdateSerializer(serializers.ModelSerializer):
             'text',
             'cooking_time',
         )
-        #validators = [
-            #validators.UniqueTogetherValidator(
-                #queryset=AmountOfIngredients.objects.all(),
-                #fields=('recipe', 'ingredient')
-            #)
-        #]
 
     def validate_ingredients(self, ingredients):
         if not ingredients:
@@ -196,16 +189,6 @@ class RecipeCreateOrUpdateSerializer(serializers.ModelSerializer):
             )
         return cooking_time
 
-    #def create_AmountOfIngredients(self, ingredients, recipe):
-        #for ingredient in ingredients:
-            #ingredient = get_object_or_404(Ingredient, pk=ingredient['id'])
-            #amount = ingredient['amount']
-            #AmountOfIngredients.objects.create(
-                #recipe=recipe,
-                #ingredient=ingredient,
-                #amount=amount,
-            #)
-
     def create_ingredients_amounts(self, ingredients, recipe):
         for ingredient in ingredients:
             ing, _ = AmountOfIngredients.objects.get_or_create(
@@ -225,26 +208,6 @@ class RecipeCreateOrUpdateSerializer(serializers.ModelSerializer):
                                         ingredients=ingredients)
         return recipe
 
-    # def create(self, validated_data):
-        # author = self.context.get('request').user эту строку не надо?
-        #ingredients = validated_data.pop('ingredients')
-        #tags = validated_data.pop('tags')
-        #recipe = Recipe.objects.create(**validated_data)
-        #recipe.tags.set(tags)
-        #for ingredient in ingredients:
-            #amount = ingredient['amount']
-            #ingredient = get_object_or_404(Ingredient, pk=ingredient['id'])
-
-            #AmountOfIngredients.objects.create(
-                # recipe=recipe, эту строку не надо?
-                #ingredient=ingredient,
-                #amount=amount
-            #)
-        #self.create_AmountOfIngredients(
-            #recipe, ingredients)
-
-        #return recipe
-
     def update(self, instance, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
@@ -255,17 +218,13 @@ class RecipeCreateOrUpdateSerializer(serializers.ModelSerializer):
                                         ingredients=ingredients)
         return super().update(instance, validated_data)
 
-    # def to_representation(self, instance):
-
 
 class RecipeReadOnlySerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     author = UserSerializer(read_only=True)
     ingredients = IngredientsReadOnlySerializer(many=True)
     is_favorited = serializers.SerializerMethodField()
-    # serializers.BooleanField(read_only=True)
     is_in_shopping_cart = serializers.SerializerMethodField()
-    # serializers.BooleanField(read_only=True)
     image = Base64ImageField()
 
     class Meta:
@@ -310,7 +269,6 @@ class SubscriptionSerializer(UserSerializer):
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
-# Не понятно, будет ли работать этот сериализатор ?
 
     class Meta:
         model = User
@@ -325,19 +283,6 @@ class SubscriptionSerializer(UserSerializer):
             "recipes_count",
         )
 
-    # def validate(self, data):
-        # if self.context['request'].method == 'POST':
-            # user = self.context.get('user')
-            # author = self.context.get('author')  # author = self.instance
-            # if User.objects.filter(
-                    # user=user, author=author).exists():
-                # raise serializers.ValidationError(
-                    # 'Вы уже подписаны на этого пользователя!')
-            # if user == author:
-                # raise serializers.ValidationError(
-                    # 'Нельзя подписаться на самого себя!')
-        # return data
-
     def get_is_subscribed(self, obj):
         return (
             self.context.get('request').user.is_authenticated
@@ -351,7 +296,8 @@ class SubscriptionSerializer(UserSerializer):
         recipes = author.recipes.all()
         if limit:
             recipes = recipes[:int(limit)]
-        serializer = FavoriteRecipeSerializer(recipes, many=True, read_only=True)
+        serializer = FavoriteRecipeSerializer(
+            recipes, many=True, read_only=True)
         return serializer.data
 
     def get_recipes_count(self, obj):
@@ -382,7 +328,8 @@ class SubscribeSerializer(UserSerializer):
 
     def validate(self, obj):
         if (self.context['request'].user == obj):
-            raise serializers.ValidationError({'errors': 'Нельзя подписаться на самого себя!'})
+            raise serializers.ValidationError(
+                {'errors': 'Нельзя подписаться на самого себя!'})
         return obj
 
     def get_is_subscribed(self, obj):

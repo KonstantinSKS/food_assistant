@@ -3,18 +3,6 @@ from django.db import models
 
 
 class User(AbstractUser):
-    # ADMIN = "admin"
-    # USER = "user"
-    # USER_ROLES = (
-        # (USER, "user"),
-        # (ADMIN, "admin"),
-    # )
-    # role = models.CharField(
-        # 'Роль',
-        # max_length=max(len(role[0]) for role in USER_ROLES),
-        # choices=USER_ROLES,
-        # default=USER
-    # )
     username = models.CharField(
         'Логин',
         max_length=150,
@@ -47,14 +35,8 @@ class User(AbstractUser):
                 name="pair username/email should be unique"),
         ]
 
-    # def is_admin(self):
-        # return self.role == self.ADMIN or self.is_superuser
-
     def __str__(self):
         return self.username
-
-    # def __str__(self):
-        # return self.username
 
 
 class Subscription(models.Model):

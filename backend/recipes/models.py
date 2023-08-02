@@ -23,7 +23,7 @@ class Tag(models.Model):
     )
 
     class Meta:
-        ordering = ('id',)  # ?
+        ordering = ('id',)
         verbose_name = 'Тэг'
         verbose_name_plural = 'Тэги'
 
@@ -42,7 +42,7 @@ class Ingredient(models.Model):
     )
 
     class Meta:
-        ordering = ('name',)  # ?
+        ordering = ('name',)
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
         constraints = [
@@ -57,12 +57,6 @@ class Ingredient(models.Model):
 
 
 class AmountOfIngredients(models.Model):
-    #recipe = models.ForeignKey(
-        #Recipe,
-        #on_delete=models.CASCADE,
-        #verbose_name='Рецепт',
-        #related_name='recipe'
-    #)
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
@@ -111,11 +105,10 @@ class Recipe(models.Model):
     text = models.TextField(
         verbose_name='Описание рецепта'
     )
-    ingredients = models.ManyToManyField(  # !!
-        AmountOfIngredients,  # !!
+    ingredients = models.ManyToManyField(
+        AmountOfIngredients,
         verbose_name='Список ингредиентов',
         related_name='recipes',
-        # through='AmountOfIngredients'
     )
     tags = models.ManyToManyField(
         Tag,
@@ -175,13 +168,13 @@ class Favorite(models.Model):
     user = models.ForeignKey(
         User,
         verbose_name='Пользователь',
-        on_delete=models.CASCADE,  # ?
+        on_delete=models.CASCADE,
         related_name='favorites'
     )
     recipe = models.ForeignKey(
         Recipe,
         verbose_name='Рецепт',
-        on_delete=models.CASCADE,  # ?
+        on_delete=models.CASCADE,
         related_name='favorites'
     )
 

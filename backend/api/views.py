@@ -3,28 +3,25 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
-from djoser.views import UserViewSet
-
 from rest_framework import viewsets, status, exceptions
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 
 from .serializers import (
-    UserCreateSerializer, UserReadOnlySerializer, SetPasswordSerializer, TagSerializer,
-    IngredientSerializer, IngredientsCreateOrUpdateSerializer,
-    IngredientsReadOnlySerializer,
-    RecipeCreateOrUpdateSerializer, RecipeReadOnlySerializer,
-    FavoriteRecipeSerializer, SubscriptionSerializer, SubscribeSerializer)
+    UserCreateSerializer, UserReadOnlySerializer, SetPasswordSerializer,
+    TagSerializer, IngredientSerializer, RecipeCreateOrUpdateSerializer,
+    RecipeReadOnlySerializer, FavoriteRecipeSerializer,
+    SubscriptionSerializer, SubscribeSerializer)
 from .pagination import LimitPagesPagination
 from .permissions import IsAdminOrReadOnly, IsAdminOrAuthorOrReadOnly
 from .filters import IngredientFilter, RecipeFilter
 from . viewsets import CreateReadViewSet
+
 from users.models import User, Subscription
 from recipes.models import (Tag, Ingredient, Recipe,
                             AmountOfIngredients, Favorite, ShoppingList)
-
-# from rest_framework.permissions import AllowAny # Временно!
 
 
 class CustomUserViewSet(CreateReadViewSet):
@@ -40,7 +37,8 @@ class CustomUserViewSet(CreateReadViewSet):
             pagination_class=None,
             permission_classes=(IsAuthenticated,))
     def me(self, request):
-        serializer = UserReadOnlySerializer(request.user, context={'request': request})
+        serializer = UserReadOnlySerializer(
+            request.user, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'],
@@ -171,8 +169,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def download_shopping_cart(self, request):
         user = self.request.user
         ingredients = (AmountOfIngredients.objects.filter(
-            recipes__shoppinglist__user=request.user)  # !!!!!!!
-            .values('ingredient__name', 'ingredient__measurement_unit')  # !!!
+            recipes__shoppinglist__user=request.user)
+            .values('ingredient__name', 'ingredient__measurement_unit')
             .annotate(amount=Sum('amount'))
         )
         count = 1
@@ -185,15 +183,3 @@ class RecipeViewSet(viewsets.ModelViewSet):
         response = HttpResponse(text, content_type='text/plain; charset=utf-8')
         response['Content-Disposition'] = f'attachment; filename={filename}'
         return response
-
-
-#class AmountOfIngredientsViewSet(viewsets.ModelViewSet):
-    #...
-
-
-#class ShoppingListViewSet(viewsets.ModelViewSet):
-    #...
-
-
-#class FavoriteViewSetviewsets(viewsets.ModelViewSet):
-    #...

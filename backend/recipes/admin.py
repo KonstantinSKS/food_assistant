@@ -48,7 +48,6 @@ class RecipeAdmin(admin.ModelAdmin):
 @admin.register(AmountOfIngredients)
 class AmountOfIngredientsAdmin(admin.ModelAdmin):
     list_display = (
-        # 'recipe',
         'ingredient',
         'amount',
     )
