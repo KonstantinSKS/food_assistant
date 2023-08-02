@@ -19,4 +19,4 @@ class Command(BaseCommand):
                     measurement_unit=row[1]
                 )
                 self.stdout.write(
-                    "!!!The Ingredient database has been loaded successfully!!!")
+                    "=The Ingredient database has been loaded successfully=")
