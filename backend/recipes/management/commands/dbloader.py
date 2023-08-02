@@ -3,7 +3,7 @@ from django.core.management import BaseCommand
 
 from recipes.models import Ingredient
 
-'''Скрипт для импорта csv-файлов в базу данных sqlite3'''
+'''Скрипт для импорта csv-файлов в базу данных'''
 '''Запуск скрипта через команду "python manage.py dbloader" в консоле'''
 
 

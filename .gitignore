@@ -128,7 +128,11 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# .idea
+# папки со статикой и медиа
+media/
+static/
+
+# Папки, создаваемые средой разработки
 .idea
 
 .vscode

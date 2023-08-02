@@ -127,7 +127,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 user=user,
                 recipe=recipe
             ).exists():
-                raise exceptions.ValidationError('Рецепт уже в избранном.')
+                raise exceptions.ValidationError('Рецепт уже в избранном!')
 
             Favorite.objects.create(user=user, recipe=recipe)
             serializer = FavoriteRecipeSerializer(
@@ -151,7 +151,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 user=user,
                 recipe=recipe
             ).exists():
-                raise exceptions.ValidationError('Рецепт уже в избранном.')
+                raise exceptions.ValidationError('Рецепт уже в избранном!')
 
             ShoppingList.objects.create(user=user, recipe=recipe)
             serializer = FavoriteRecipeSerializer(

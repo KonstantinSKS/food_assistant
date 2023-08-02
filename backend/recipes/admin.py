@@ -56,9 +56,21 @@ class AmountOfIngredientsAdmin(admin.ModelAdmin):
 
 @admin.register(ShoppingList)
 class ShoppingListAdmin(admin.ModelAdmin):
-    ...
+    list_display = (
+        'user',
+        'recipe'
+    )
+    list_filter = ('user', 'recipe')
+    search_fields = ('user',)
+    empty_value_display = '-пусто-'
 
 
 @admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
-    ...
+    list_display = (
+        'user',
+        'recipe'
+    )
+    list_filter = ('user', 'recipe')
+    search_fields = ('user',)
+    empty_value_display = '-пусто-'

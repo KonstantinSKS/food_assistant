@@ -191,13 +191,13 @@ class RecipeCreateOrUpdateSerializer(serializers.ModelSerializer):
 
     def create_ingredients_amounts(self, ingredients, recipe):
         for ingredient in ingredients:
-            ing, _ = AmountOfIngredients.objects.get_or_create(
+            unit, _ = AmountOfIngredients.objects.get_or_create(
                 ingredient=get_object_or_404(
                     Ingredient.objects.filter(id=ingredient['id'])
                 ),
                 amount=ingredient['amount'],
             )
-            recipe.ingredients.add(ing.id)
+            recipe.ingredients.add(unit.id)
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')
