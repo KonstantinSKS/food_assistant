@@ -3,13 +3,10 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
-from djoser.views import UserViewSet
-
-from rest_framework import viewsets, status, exceptions
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import (IsAuthenticated, AllowAny,
-                                        IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import (IsAuthenticated, AllowAny)
 
 from .serializers import (
     CreateUserSerializer, UserReadOnlySerializer, SetPasswordSerializer,
@@ -34,10 +31,6 @@ class CustomUserViewSet(CreateReadViewSet):
         if self.action in ('list', 'retrieve'):
             return UserReadOnlySerializer
         return CreateUserSerializer
-
-    #def perform_create(self, serializer):
-        #password = make_password(self.request.data['password'])
-        #serializer.save(password=password)
 
     @action(detail=False, methods=['get'],
             pagination_class=None,
@@ -126,49 +119,42 @@ class RecipeViewSet(viewsets.ModelViewSet):
             permission_classes=(IsAuthenticated,))
     def favorite(self, request, pk):
         recipe = get_object_or_404(Recipe, pk=pk)
-        user = self.request.user
 
         if self.request.method == 'POST':
-            #if Favorite.objects.filter(   ЭТО НАДО УБРАТЬ В СЕРИАЛИЗАТОР!
-            #    user=user,
-            #    recipe=recipe
-            #).exists():
-            #    raise exceptions.ValidationError('Рецепт уже в избранном!')
-
-            Favorite.objects.create(user=user, recipe=recipe)
             serializer = FavoriteSerializer(
-                recipe,
-                data=request.data
+                data={'user': request.user.id, 'recipe': recipe.id}
             )
             serializer.is_valid(raise_exception=True)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            serializer.save()
+            favorite_recipe_serializer = FavoriteRecipeSerializer(recipe)
+            return Response(
+                favorite_recipe_serializer.data, status=status.HTTP_201_CREATED
+            )
 
         if self.request.method == 'DELETE':
-            get_object_or_404(Favorite, user=user, recipe=recipe).delete()
+            get_object_or_404(Favorite, user=self.request.user,
+                              recipe=recipe).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=(IsAuthenticated,))
     def shopping_cart(self, request, pk):
         recipe = get_object_or_404(Recipe, pk=pk)
-        user = self.request.user
 
         if self.request.method == 'POST':
-            #if ShoppingList.objects.filter(   ЭТО НАДО УБРАТЬ В СЕРИАЛИЗАТОР!
-            #    user=user,
-            #    recipe=recipe
-            #).exists():
-            #    raise exceptions.ValidationError('Рецепт уже в избранном!')
-
-            ShoppingList.objects.create(user=user, recipe=recipe)
             serializer = ShoppingCartSerializer(
-                recipe,
-                context={'request': request}
+                data={'user': request.user.id, 'recipe': recipe.id}
             )
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            favorite_recipe_serializer = FavoriteRecipeSerializer(recipe)
+            return Response(
+                favorite_recipe_serializer.data, status=status.HTTP_201_CREATED
+            )
 
         if self.request.method == 'DELETE':
-            get_object_or_404(ShoppingList, user=user, recipe=recipe).delete()
+            get_object_or_404(ShoppingList, user=self.request.user,
+                              recipe=recipe).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=['get'],
@@ -176,7 +162,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def download_shopping_cart(self, request):
         user = self.request.user
         ingredients = (AmountOfIngredients.objects.filter(
-            recipes__shoppinglist__user=request.user)
+            recipe__shoppinglist__user=request.user)
             .values('ingredient__name', 'ingredient__measurement_unit')
             .annotate(amount=Sum('amount'))
         )

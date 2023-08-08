@@ -5,9 +5,8 @@ from .models import (Tag, Ingredient, Recipe,
                      Favorite, MIN_UNIT_AMOUNT)
 
 
-class RecipeIngredientInline(admin.TabularInline):  # ??
-    model = AmountOfIngredients  # Recipe.ingredients.through
-    # min_num = MIN_UNIT_AMOUNT
+class RecipeIngredientInline(admin.TabularInline):
+    model = AmountOfIngredients
     extra = MIN_UNIT_AMOUNT
 
 
@@ -46,7 +45,7 @@ class RecipeAdmin(admin.ModelAdmin):
         'name',
         'tags',)
     search_fields = ('name',)
-    inlines = (RecipeIngredientInline,)  # ??
+    inlines = (RecipeIngredientInline,)
     empty_value_display = '-пусто-'
 
     def favorites(self, obj):

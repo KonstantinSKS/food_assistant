@@ -71,10 +71,6 @@ class UserReadOnlySerializer(UserSerializer):
             self.context.get('request').user.is_authenticated
             and Subscription.objects.filter(user=self.context['request'].user,
                                             author=obj).exists())
-        #if (self.context.get('request').user).is_anonymous:
-        #    return False
-        #return Subscription.objects.filter(user=self.context['request'].user,
-        #                                   author=obj).exists()
 
 
 class SetPasswordSerializer(serializers.Serializer):
@@ -116,10 +112,6 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 class IngredientsCreateOrUpdateSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
-    #amount = serializers.IntegerField(
-    #    validators=(MinValueValidator(MIN_UNIT_AMOUNT),
-    #                MaxValueValidator(MAX_UNIT_AMOUNT))
-    #)
 
     class Meta:
         model = AmountOfIngredients
@@ -354,7 +346,7 @@ class SubscribeSerializer(UserSerializer):
         return obj.recipes.count()
 
 
-class FavoriteSerializer(FavoriteRecipeSerializer):
+class FavoriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Favorite
@@ -362,15 +354,13 @@ class FavoriteSerializer(FavoriteRecipeSerializer):
             'user',
             'recipe'
         )
-
-    def validate(self, data):
-        user = data['user']
-        recipe = data['recipe']
-        if self.context['request'].method == 'POST':
-            if Favorite.objects.filter(recipe=recipe, user=user).exists():
-                raise serializers.ValidationError(
-                    detail='Рецепт уже добавлен в избранное.')
-        return data
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=Favorite.objects.all(),
+                fields=('user', 'recipe'),
+                message='Рецепт уже в избранном!'
+            )
+        ]
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
@@ -383,7 +373,7 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
 
     validators = [
         serializers.UniqueTogetherValidator(
-            queryset=Recipe.objects.all(),
+            queryset=ShoppingList.objects.all(),
             fields=('user', 'recipe'),
             message='Рецепт уже добавлен в список покупок!'
         )
