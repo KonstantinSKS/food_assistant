@@ -32,7 +32,7 @@ class User(AbstractUser):
         constraints = [
             models.UniqueConstraint(
                 fields=['username', 'email'],
-                name="pair username/email should be unique"),
+                name='pair username/email should be unique'),
         ]
 
     def __str__(self):
@@ -54,12 +54,13 @@ class Subscription(models.Model):
     )
 
     class Meta:
+        ordering = ('-author_id',)
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'author'],
-                name="unique_subscriptions"),
+                name='unique_subscriptions'),
         ]
 
     def __str__(self):

@@ -1,7 +1,14 @@
 from django.contrib import admin
 
 from .models import (Tag, Ingredient, Recipe,
-                     AmountOfIngredients, ShoppingList, Favorite)
+                     AmountOfIngredients, ShoppingList,
+                     Favorite, MIN_UNIT_AMOUNT)
+
+
+class RecipeIngredientInline(admin.TabularInline):  # ??
+    model = AmountOfIngredients  # Recipe.ingredients.through
+    # min_num = MIN_UNIT_AMOUNT
+    extra = MIN_UNIT_AMOUNT
 
 
 @admin.register(Tag)
@@ -39,10 +46,11 @@ class RecipeAdmin(admin.ModelAdmin):
         'name',
         'tags',)
     search_fields = ('name',)
+    inlines = (RecipeIngredientInline,)  # ??
     empty_value_display = '-пусто-'
 
     def favorites(self, obj):
-        return Favorite.objects.filter(recipe=obj).count()
+        return obj.favorites.count()
 
 
 @admin.register(AmountOfIngredients)

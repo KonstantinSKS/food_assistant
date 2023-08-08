@@ -3,17 +3,19 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
+from djoser.views import UserViewSet
+
 from rest_framework import viewsets, status, exceptions
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import (IsAuthenticated,
+from rest_framework.permissions import (IsAuthenticated, AllowAny,
                                         IsAuthenticatedOrReadOnly)
 
 from .serializers import (
-    UserCreateSerializer, UserReadOnlySerializer, SetPasswordSerializer,
+    CreateUserSerializer, UserReadOnlySerializer, SetPasswordSerializer,
     TagSerializer, IngredientSerializer, RecipeCreateOrUpdateSerializer,
-    RecipeReadOnlySerializer, FavoriteRecipeSerializer,
-    SubscriptionSerializer, SubscribeSerializer)
+    RecipeReadOnlySerializer, FavoriteRecipeSerializer, ShoppingCartSerializer,
+    SubscriptionSerializer, SubscribeSerializer, FavoriteSerializer)
 from .pagination import LimitPagesPagination
 from .permissions import IsAdminOrReadOnly, IsAdminOrAuthorOrReadOnly
 from .filters import IngredientFilter, RecipeFilter
@@ -26,12 +28,16 @@ from recipes.models import (Tag, Ingredient, Recipe,
 
 class CustomUserViewSet(CreateReadViewSet):
     queryset = User.objects.all()
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (AllowAny,)
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
             return UserReadOnlySerializer
-        return UserCreateSerializer
+        return CreateUserSerializer
+
+    #def perform_create(self, serializer):
+        #password = make_password(self.request.data['password'])
+        #serializer.save(password=password)
 
     @action(detail=False, methods=['get'],
             pagination_class=None,
@@ -60,7 +66,7 @@ class CustomUserViewSet(CreateReadViewSet):
 
         if request.method == 'POST':
             serializer = SubscribeSerializer(
-                author, data=request.data, context={"request": request})
+                author, data=request.data, context={'request': request})
             serializer.is_valid(raise_exception=True)
             Subscription.objects.create(user=request.user, author=author)
             return Response(serializer.data,
@@ -123,17 +129,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
         user = self.request.user
 
         if self.request.method == 'POST':
-            if Favorite.objects.filter(
-                user=user,
-                recipe=recipe
-            ).exists():
-                raise exceptions.ValidationError('Рецепт уже в избранном!')
+            #if Favorite.objects.filter(   ЭТО НАДО УБРАТЬ В СЕРИАЛИЗАТОР!
+            #    user=user,
+            #    recipe=recipe
+            #).exists():
+            #    raise exceptions.ValidationError('Рецепт уже в избранном!')
 
             Favorite.objects.create(user=user, recipe=recipe)
-            serializer = FavoriteRecipeSerializer(
+            serializer = FavoriteSerializer(
                 recipe,
-                context={'request': request}
+                data=request.data
             )
+            serializer.is_valid(raise_exception=True)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if self.request.method == 'DELETE':
@@ -147,14 +154,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
         user = self.request.user
 
         if self.request.method == 'POST':
-            if ShoppingList.objects.filter(
-                user=user,
-                recipe=recipe
-            ).exists():
-                raise exceptions.ValidationError('Рецепт уже в избранном!')
+            #if ShoppingList.objects.filter(   ЭТО НАДО УБРАТЬ В СЕРИАЛИЗАТОР!
+            #    user=user,
+            #    recipe=recipe
+            #).exists():
+            #    raise exceptions.ValidationError('Рецепт уже в избранном!')
 
             ShoppingList.objects.create(user=user, recipe=recipe)
-            serializer = FavoriteRecipeSerializer(
+            serializer = ShoppingCartSerializer(
                 recipe,
                 context={'request': request}
             )
