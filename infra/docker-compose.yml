@@ -14,7 +14,7 @@ services:
     env_file:
       - ../.env
   backend:
-    image: konstantinsks/backend:latest
+    image: konstantinsks/backend
     restart: always
     volumes:
       - static_value:/app/static
@@ -23,13 +23,13 @@ services:
       - db
     env_file: ../.env
   frontend:
-    image: konstantinsks/backend:latest
+    image: konstantinsks/backend
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
       - backend
   nginx:
-    image: nginx:latest
+    image: nginx:1.19.3
     ports:
       - "80:80"
     volumes:
