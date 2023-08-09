@@ -14,7 +14,7 @@ services:
     env_file:
       - ../.env
   backend:
-    image: konstantinsks/backend
+    image: konstantinsks/foodgram_backend:latest
     restart: always
     volumes:
       - static_value:/app/static
@@ -23,13 +23,13 @@ services:
       - db
     env_file: ../.env
   frontend:
-    image: konstantinsks/backend
+    image: konstantinsks/foodgram_frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
       - backend
   nginx:
-    image: nginx:1.19.3
+    image: nginx:latest
     ports:
       - "80:80"
     volumes:
