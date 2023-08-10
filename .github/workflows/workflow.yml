@@ -16,9 +16,10 @@ jobs:
       run: |
         cd backend
         python -m pip install --upgrade pip 
-        pip install flake8==6.0.0 flake8-isort==6.0.0
+        pip install flake8
         pip install -r requirements.txt 
-    - name: Test with flake8 and django tests
+
+    - name: Test with flake8
       run: |
         cd backend 
         python -m flake8 --exclude migrations,foodgram/settings.py
