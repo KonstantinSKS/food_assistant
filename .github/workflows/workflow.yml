@@ -65,6 +65,8 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
+            sudo docker-compose stop
+            sudo docker-compose rm backend
             sudo rm .env
             sudo touch .env
             echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
@@ -75,8 +77,6 @@ jobs:
             echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
             echo DEBUG=${{ secrets.DEBUG }} >> .env
             cd infra/
-            sudo docker-compose stop
-            sudo docker-compose rm backend
             sudo docker-compose up -d
             sudo docker-compose exec backend python manage.py collectstatic --no-input
 
