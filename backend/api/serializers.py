@@ -371,8 +371,9 @@ class FavoriteSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, obj):
-        user = self.context['request'].user
-        if user.favorites.exists():
+        recipe = self.instance
+        # user = self.context['request'].user
+        if recipe.favorites.exists():
             raise serializers.ValidationError(
                 {'errors': 'Рецепт уже в избранном!'})
         return obj  # if (self.context['request'].recipe == obj):
@@ -414,8 +415,9 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, obj):
-        user = self.context['request'].user
-        if user.shoppinglist.exists():
+        recipe = self.instance
+        # user = self.context['request'].user
+        if recipe.shoppinglist.exists():
             raise serializers.ValidationError(
                 {'errors': 'Рецепт уже в списке покупок!'})
         return obj  # if (self.context['request'].recipe == obj):
