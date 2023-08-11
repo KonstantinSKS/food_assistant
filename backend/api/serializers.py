@@ -270,6 +270,10 @@ class RecipeReadOnlySerializer(serializers.ModelSerializer):
 
 
 class FavoriteRecipeSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source='favorite.user')
+    recipe = serializers.ReadOnlyField(source='favorite.recipe')
+    name = serializers.ReadOnlyField()
+    cooking_time = serializers.ReadOnlyField()
 
     class Meta:
         model = Recipe
@@ -278,7 +282,16 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
             'name',
             'image',
             'cooking_time',
+            'user',
+            'recipe'
         )
+
+    def validate(self, obj):
+        recipe = self.instance
+        if recipe.favorites.exists():
+            raise serializers.ValidationError(
+                {'errors': 'Рецепт уже в избранном!'})
+        return obj
 
 
 class SubscriptionSerializer(UserSerializer):
@@ -371,8 +384,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, obj):
-        recipe = self.instance
-        # user = self.context['request'].user
+        recipe = self.instance  # user = self.context['request'].user
         if recipe.favorites.exists():
             raise serializers.ValidationError(
                 {'errors': 'Рецепт уже в избранном!'})
