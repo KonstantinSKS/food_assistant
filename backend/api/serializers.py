@@ -202,9 +202,10 @@ class RecipeCreateOrUpdateSerializer(serializers.ModelSerializer):
         )
 
     def create(self, validated_data):
+        author = self.context.get('request').user
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
-        recipe = Recipe.objects.create(**validated_data)
+        recipe = Recipe.objects.create(author=author, **validated_data)
         recipe.tags.set(tags)
         self.create_ingredients_amounts(recipe=recipe,
                                         ingredients=ingredients)
@@ -219,6 +220,12 @@ class RecipeCreateOrUpdateSerializer(serializers.ModelSerializer):
         self.create_ingredients_amounts(recipe=instance,
                                         ingredients=ingredients)
         return super().update(instance, validated_data)
+
+    def to_representation(self, instance):
+        return RecipeReadOnlySerializer(
+            instance,
+            context=self.context
+        ).data
 
 
 class RecipeReadOnlySerializer(serializers.ModelSerializer):

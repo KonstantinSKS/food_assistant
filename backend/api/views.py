@@ -98,7 +98,6 @@ class IngredientViewSet(viewsets.ModelViewSet):
     serializer_class = IngredientSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = IngredientFilter
-    search_fields = ('^name',)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -113,9 +112,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return RecipeReadOnlySerializer
         return RecipeCreateOrUpdateSerializer
 
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
-
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=(IsAuthenticated,))
     def favorite(self, request, pk):
@@ -126,7 +122,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 data={'user': request.user.id, 'recipe': recipe.id}
             )
             serializer.is_valid(raise_exception=True)
-            serializer.save()
+            Favorite.objects.create(user=request.user, recipe=recipe)
             favorite_recipe_serializer = FavoriteRecipeSerializer(recipe)
             return Response(
                 favorite_recipe_serializer.data, status=status.HTTP_201_CREATED
@@ -147,7 +143,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 data={'user': request.user.id, 'recipe': recipe.id}
             )
             serializer.is_valid(raise_exception=True)
-            serializer.save()
+            ShoppingList.objects.create(user=request.user, recipe=recipe)
             favorite_recipe_serializer = FavoriteRecipeSerializer(recipe)
             return Response(
                 favorite_recipe_serializer.data, status=status.HTTP_201_CREATED
