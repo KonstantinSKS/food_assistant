@@ -122,7 +122,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 data={'user': request.user.id, 'recipe': recipe.id}
             )
             serializer.is_valid(raise_exception=True)
-            Favorite.objects.create(user=request.user, recipe=recipe)
+            Favorite.objects.create(user=self.request.user, recipe=recipe)
             favorite_recipe_serializer = FavoriteRecipeSerializer(recipe)
             return Response(
                 favorite_recipe_serializer.data, status=status.HTTP_201_CREATED
@@ -143,7 +143,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 data={'user': request.user.id, 'recipe': recipe.id}
             )
             serializer.is_valid(raise_exception=True)
-            ShoppingList.objects.create(user=request.user, recipe=recipe)
+            ShoppingList.objects.create(user=self.request.user, recipe=recipe)
             favorite_recipe_serializer = FavoriteRecipeSerializer(recipe)
             return Response(
                 favorite_recipe_serializer.data, status=status.HTTP_201_CREATED
