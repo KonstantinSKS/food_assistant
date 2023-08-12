@@ -384,8 +384,11 @@ class FavoriteSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, obj):
-        recipe = self.instance  # user = self.context['request'].user
-        if recipe.favorites.exists():
+        recipe = self.instance
+        # user = self.context['request'].user
+        # if recipe.favorites.exists():
+        if not Favorite.objects.filter(user=self.context['request'].user,
+                                       recipe=recipe).exists():
             raise serializers.ValidationError(
                 {'errors': 'Рецепт уже в избранном!'})
         return obj  # if (self.context['request'].recipe == obj):

@@ -11,9 +11,9 @@ from rest_framework.permissions import (IsAuthenticated, AllowAny)
 from .serializers import (
     CreateUserSerializer, UserReadOnlySerializer, SetPasswordSerializer,
     TagSerializer, IngredientSerializer, RecipeCreateOrUpdateSerializer,
-    RecipeReadOnlySerializer, FavoriteRecipeSerializer, ShoppingCartSerializer,
+    RecipeReadOnlySerializer, FavoriteRecipeSerializer,
     SubscriptionSerializer, SubscribeSerializer)  # FavoriteSerializer
-from .pagination import LimitPagesPagination
+from .pagination import LimitPagesPagination   # ShoppingCartSerializer
 from .permissions import IsAdminOrReadOnly, IsAdminOrAuthorOrReadOnly
 from .filters import IngredientFilter, RecipeFilter
 from . viewsets import CreateReadViewSet
@@ -142,12 +142,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
             serializer = FavoriteRecipeSerializer(
                 recipe, data=request.data, context={'request': request})
             serializer.is_valid(raise_exception=True)
-            if not Favorite.objects.filter(user=request.user,
-                                           recipe=recipe).exists():
-                Favorite.objects.create(user=request.user, recipe=recipe)
-                # avorite_recipe_serializer = FavoriteRecipeSerializer(recipe)
-                return Response(serializer.data,
-                                status=status.HTTP_201_CREATED)
+            # if not Favorite.objects.filter(user=request.user,
+            # recipe=recipe).exists():
+            Favorite.objects.create(user=request.user, recipe=recipe)
+            # avorite_recipe_serializer = FavoriteRecipeSerializer(recipe)
+            return Response(serializer.data,
+                            status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
             get_object_or_404(Favorite, user=request.user,
@@ -185,12 +185,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def shopping_cart(self, request, **kwargs):
         recipe = get_object_or_404(Recipe, id=kwargs['pk'])
         if request.method == 'POST':
-            serializer = ShoppingCartSerializer(
+            serializer = FavoriteRecipeSerializer(
                 recipe, data=request.data, context={'request': request})
             serializer.is_valid(raise_exception=True)
             ShoppingList.objects.create(user=request.user, recipe=recipe)
-            favorite_recipe_serializer = FavoriteRecipeSerializer(recipe)
-            return Response(favorite_recipe_serializer.data,
+            # favorite_recipe_serializer = FavoriteRecipeSerializer(recipe)
+            return Response(serializer.data,
                             status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
