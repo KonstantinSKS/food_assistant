@@ -248,3 +248,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         response = HttpResponse(text, content_type='text/plain; charset=utf-8')
         response['Content-Disposition'] = f'attachment; filename={filename}'
         return response
+
+
+class FavoriteViewSet(viewsets.ModelViewSet):
+    serializer_class = FavoriteSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        recipe_id = self.kwargs.get('recipe_id')
+        recipe = get_object_or_404(Recipe, id=recipe_id)
+        return recipe.favorites.all()
