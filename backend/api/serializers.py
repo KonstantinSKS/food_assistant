@@ -282,6 +282,9 @@ class RecipeReadOnlySerializer(serializers.ModelSerializer):
 
 
 class FavoriteRecipeSerializer(serializers.ModelSerializer):
+    name = serializers.ReadOnlyField()
+    image = Base64ImageField(read_only=True)
+    cooking_time = serializers.ReadOnlyField()  # Добавлено!
 
     class Meta:
         model = Recipe
