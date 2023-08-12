@@ -232,7 +232,7 @@ class RecipeReadOnlySerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     author = UserReadOnlySerializer(read_only=True)
     ingredients = IngredientsReadOnlySerializer(source='recipes',
-                                                many=True)
+                                                many=True, read_only=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     image = Base64ImageField()
@@ -253,18 +253,30 @@ class RecipeReadOnlySerializer(serializers.ModelSerializer):
         )
 
     def get_is_favorited(self, obj):
-        user = self.context['request'].user
-        if user.is_authenticated:
-            return user.favorites.filter(recipe=obj).exists()
-        return False
-    #    user = self.context.get('request').user
+        return (
+            self.context.get('request').user.is_authenticated
+            and Favorite.objects.filter(user=self.context['request'].user,
+                                        recipe=obj).exists()
+        )
+
+        # user = self.context['request'].user
+        # if user.is_authenticated:
+        #    return user.favorites.filter(recipe=obj).exists()
+        # return False
+        # user = self.context.get('request').user
         #  if not user.is_anonymous:
 
     def get_is_in_shopping_cart(self, obj):
-        user = self.context['request'].user
-        if user.is_authenticated:
-            return user.shoppinglist.filter(recipe=obj).exists()
-        return False
+        return (
+            self.context.get('request').user.is_authenticated
+            and ShoppingList.objects.filter(
+                user=self.context['request'].user,
+                recipe=obj).exists()
+        )
+        # user = self.context['request'].user
+        # if user.is_authenticated:
+        # return user.shoppinglist.filter(recipe=obj).exists()
+        # return False
 # user = self.context.get('request').user
         # if not user.is_anonymous:
 
