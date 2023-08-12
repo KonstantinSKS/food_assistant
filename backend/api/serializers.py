@@ -270,10 +270,6 @@ class RecipeReadOnlySerializer(serializers.ModelSerializer):
 
 
 class FavoriteRecipeSerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField(source='favorite.user')
-    recipe = serializers.ReadOnlyField(source='favorite.recipe')
-    name = serializers.ReadOnlyField()
-    cooking_time = serializers.ReadOnlyField()
 
     class Meta:
         model = Recipe
@@ -281,18 +277,16 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'image',
-            'cooking_time',
-            'user',
-            'recipe'
+            'cooking_time'
         )
 
-    def validate(self, obj):
-        recipe = self.instance
-        if not Favorite.objects.filter(user=self.context['request'].user,
-                                       recipe=recipe).exists():
-            raise serializers.ValidationError(
-                {'errors': 'Рецепт уже в избранном!'})
-        return obj
+    # def validate(self, obj):
+    #    recipe = self.instance
+    #    if not Favorite.objects.filter(user=self.context['request'].user,
+    #                                   recipe=recipe).exists():
+    #        raise serializers.ValidationError(
+    #            {'errors': 'Рецепт уже в избранном!'})
+    #    return obj
 
 
 class SubscriptionSerializer(UserSerializer):
@@ -374,8 +368,6 @@ class SubscribeSerializer(UserSerializer):
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField()
-    recipe = serializers.ReadOnlyField()
 
     class Meta:
         model = Favorite
@@ -384,15 +376,34 @@ class FavoriteSerializer(serializers.ModelSerializer):
             'recipe'
         )
 
-    def validate(self, obj):
-        recipe = self.instance
+    def validate(self, data):
+        user = data['user']
+        recipe = data['recipe']
+        action = self.context['action']
+        recipe_in_favorites = Favorite.objects.filter(
+            recipe=recipe,
+            user=user
+        )
+        if action == 'remove':
+            if not recipe_in_favorites:
+                raise serializers.ValidationError(
+                    detail='Рецепт удален из избранного!')
+            recipe_in_favorites.delete()
+        elif action == 'add':
+            if recipe_in_favorites:
+                raise serializers.ValidationError(
+                    detail='Рецепт уже в избранном!')
+        return data
+
+    # def validate(self, obj):
+    #   recipe = self.instance
         # user = self.context['request'].user
         # if recipe.favorites.exists():
-        if not Favorite.objects.filter(user=self.context['request'].user,
-                                       recipe=recipe).exists():
-            raise serializers.ValidationError(
-                {'errors': 'Рецепт уже в избранном!'})
-        return obj  # if (self.context['request'].recipe == obj):
+    #    if not Favorite.objects.filter(user=self.context['request'].user,
+    #                                   recipe=recipe).exists():
+    #        raise serializers.ValidationError(
+    #            {'errors': 'Рецепт уже в избранном!'})
+    #    return obj  # if (self.context['request'].recipe == obj):
 
     # def validate(self, data):
     #    user = data['user']
@@ -420,8 +431,6 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField()
-    recipe = serializers.ReadOnlyField()
 
     class Meta:
         model = ShoppingList
@@ -430,13 +439,50 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
             'recipe'
         )
 
-    def validate(self, obj):
-        recipe = self.instance
+    def validate(self, data):
+        user = data['user']
+        recipe = data['recipe']
+        action = self.context['action']
+        recipe_in_sh_cart = ShoppingList.objects.filter(
+            recipe=recipe,
+            user=user
+        )
+        if action == 'remove':
+            if not recipe_in_sh_cart:
+                raise serializers.ValidationError(
+                    detail='Рецепт удален из списка покупок!')
+            recipe_in_sh_cart.delete()
+        elif action == 'add':
+            if recipe_in_sh_cart:
+                raise serializers.ValidationError(
+                    detail='Рецепт уже в списке покупок!')
+        return data
+
+    # def validate(self, obj):
+    #    recipe = self.instance
+    #    if not ShoppingList.objects.filter(user=self.context['request'].user,
+    #                                       recipe=recipe).exists():
+    #        raise serializers.ValidationError(
+    #            {'errors': 'Рецепт уже в списке покупок!'})
+    #    return obj
+
+    # user = serializers.ReadOnlyField()
+    # recipe = serializers.ReadOnlyField()
+
+    # class Meta:
+    #    model = ShoppingList
+    #    fields = (
+    #        'user',
+    #        'recipe'
+    #    )
+
+    # def validate(self, obj):
+    #    recipe = self.instance
         # user = self.context['request'].user
-        if recipe.shoppinglist.exists():
-            raise serializers.ValidationError(
-                {'errors': 'Рецепт уже в списке покупок!'})
-        return obj  # if (self.context['request'].recipe == obj):
+    #    if recipe.shoppinglist.exists():
+    #        raise serializers.ValidationError(
+    #            {'errors': 'Рецепт уже в списке покупок!'})
+    #    return obj  # if (self.context['request'].recipe == obj):
 
     # def validate(self, data):
     #    user = data['user']
