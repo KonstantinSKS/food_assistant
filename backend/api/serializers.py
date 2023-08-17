@@ -380,33 +380,27 @@ class SubscribeSerializer(UserSerializer):
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
-    user = UserSerializer
-    recipe = RecipeReadOnlySerializer
 
     class Meta:
         model = Favorite
-        fields = ('user', 'recipe')
+        fields = (
+            'user',
+            'recipe'
+        )
         validators = (
             serializers.UniqueTogetherValidator(
                 queryset=Favorite.objects.all(),
                 fields=('user', 'recipe'),
-                message='Данный рецепт уже есть в избраном'
+                message='Рецепт уже в избранном!'
             ),
         )
 
-    def validate(self, data):
-        user = data.get('user')
-        recipe = data.get('recipe')
-        if Favorite.objects.filter(user=user, recipe=recipe).exists():
-            raise serializers.ValidationError(
-                {'errors': 'Данный рецепт уже есть в избраном'}
-            )
-        return data
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        return FavoriteRecipeSerializer(
+            instance.recipe,
+            context={'request': request}).data
 
-    def create(self, validated_data):
-        user = validated_data.get('user')
-        recipe = validated_data.get('recipe')
-        return Favorite.objects.create(user=user, recipe=recipe)
 
 # class FavoriteSerializer(serializers.ModelSerializer):
 
@@ -466,24 +460,26 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
-    user = UserSerializer
-    recipe = RecipeReadOnlySerializer
 
     class Meta:
         model = ShoppingList
-        fields = ('user', 'recipe')
+        fields = (
+            'user',
+            'recipe'
+        )
         validators = (
             serializers.UniqueTogetherValidator(
                 queryset=ShoppingList.objects.all(),
                 fields=('user', 'recipe'),
-                message='Рецепт уже добавлен в список покупок'
+                message='Рецепт уже в списке покупок!'
             ),
         )
 
-    def create(self, validated_data):
-        user = validated_data.get('user')
-        recipe = validated_data.get('recipe')
-        return ShoppingList.objects.create(user=user, recipe=recipe)
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        return FavoriteRecipeSerializer(
+            instance.recipe,
+            context={'request': request}).data
 
 #    class Meta:
 #        model = ShoppingList
