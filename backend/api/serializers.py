@@ -385,7 +385,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
         model = Favorite
         fields = (
             'user',
-            'recipe'
+            'recipe',
         )
         validators = (
             serializers.UniqueTogetherValidator(
@@ -465,7 +465,7 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
         model = ShoppingList
         fields = (
             'user',
-            'recipe'
+            'recipe',
         )
         validators = (
             serializers.UniqueTogetherValidator(
