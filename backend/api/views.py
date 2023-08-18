@@ -11,7 +11,7 @@ from rest_framework.permissions import (IsAuthenticated, AllowAny)
 from .serializers import (
     CreateUserSerializer, UserReadOnlySerializer, SetPasswordSerializer,
     TagSerializer, IngredientSerializer, RecipeCreateOrUpdateSerializer,
-    RecipeReadOnlySerializer, FavoriteSerializer,  # FavoriteRecipeSerializer
+    RecipeReadOnlySerializer,  # FavoriteRecipeSerializer FavoriteSerializer
     SubscriptionSerializer, SubscribeSerializer, ShoppingCartSerializer)
 from .pagination import LimitPagesPagination
 from .permissions import IsAdminOrReadOnly, IsAdminOrAuthorOrReadOnly
@@ -200,13 +200,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
         user = get_object_or_404(User, id=request.user.id)
 
         if request.method == 'POST':
-            serializer = FavoriteSerializer(
-                data={'user': user.id, 'recipe': recipe.id})
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            # Favorite.objects.create(user=request.user, recipe=recipe)
-            return Response(serializer.data,
+            Favorite.objects.create(user=user, recipe=recipe)
+            return Response({'detail': 'Рецепт успешно добавлен в избранное.'},
                             status=status.HTTP_201_CREATED)
+            # serializer = FavoriteSerializer(
+            #    data={'user': user.id, 'recipe': recipe.id})
+            # serializer.is_valid(raise_exception=True)
+            # serializer.save()
+            # Favorite.objects.create(user=request.user, recipe=recipe) !
+            # return Response(serializer.data,
+            #                status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
             get_object_or_404(Favorite, user=request.user,
