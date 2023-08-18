@@ -195,7 +195,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         #    return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=['post', 'delete'],
-            url_path='favorite', url_name='favorite',
+            # url_path='favorite', url_name='favorite',
             permission_classes=[IsAuthenticated])
     def favorite(self, request, **kwargs):
         recipe = get_object_or_404(Recipe, id=kwargs['pk'])
