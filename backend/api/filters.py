@@ -14,11 +14,11 @@ class IngredientFilter(django_filters.FilterSet):
 
 
 class RecipeFilter(django_filters.FilterSet):
-    is_favorited = django_filters.BooleanFilter(
+    is_favorited = django_filters.NumberFilter(
         method='is_favorited_filter')
     author = django_filters.ModelChoiceFilter(
         queryset=User.objects.all())
-    is_in_shopping_cart = django_filters.BooleanFilter(
+    is_in_shopping_cart = django_filters.NumberFilter(
         method='is_in_shopping_cart_filter')
     tags = django_filters.ModelMultipleChoiceFilter(
         field_name='tags__slug',
@@ -28,9 +28,9 @@ class RecipeFilter(django_filters.FilterSet):
     class Meta:
         model = Recipe
         fields = (
-            # 'is_favorited',
+            'is_favorited',
             'author',
-            # 'is_in_shopping_cart',
+            'is_in_shopping_cart',
             'tags',
         )
 
