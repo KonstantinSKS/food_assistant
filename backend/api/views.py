@@ -114,79 +114,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return RecipeCreateOrUpdateSerializer
 
     @action(detail=True, methods=['post', 'delete'],
-            url_path='favorite', url_name='favorite',
-            permission_classes=[IsAuthenticated])
-    def favorite(self, request, **kwargs):
-        recipe = get_object_or_404(Recipe, id=kwargs['pk'])
-        user = get_object_or_404(User, id=request.user.id)
-
-        if request.method == 'POST':
-            serializer = FavoriteSerializer(
-                data={'user': user.id, 'recipe': recipe.id})
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            # Favorite.objects.create(user=request.user, recipe=recipe)
-            return Response(serializer.data,
-                            status=status.HTTP_201_CREATED)
-
-        if request.method == 'DELETE':
-            get_object_or_404(Favorite, user=request.user,
-                              recipe=recipe).delete()
-            return Response({'detail': 'Рецепт успешно удален из избранного!'},
-                            status=status.HTTP_204_NO_CONTENT)
-
-        # recipe = get_object_or_404(Recipe, id=pk)
-        # if request.method == 'POST':
-        #    return create_model_instance(request, recipe, FavoriteSerializer)
-
-        # if request.method == 'DELETE':
-        #    error_message = 'Рецепт удален из избранного!'
-        #    return delete_model_instance(request, Favorite,
-        #                                 recipe, error_message)
-    # def favorite(self, request, **kwargs):
-    #    recipe = get_object_or_404(Recipe, id=kwargs['pk'])
-    #    if request.method == 'POST':
-    #        serializer = FavoriteRecipeSerializer(
-    #            recipe, data=request.data, context={'request': request})
-    #        serializer.is_valid(raise_exception=True)
-    # if not Favorite.objects.filter(user=request.user,
-    # recipe=recipe).exists():
-    #        Favorite.objects.create(user=request.user, recipe=recipe)
-    # avorite_recipe_serializer = FavoriteRecipeSerializer(recipe)
-    #        return Response(serializer.data,
-    #                        status=status.HTTP_201_CREATED)
-    #    if request.method == 'DELETE':
-    #        get_object_or_404(Favorite, user=request.user,
-    #                          recipe=recipe).delete()
-    #        return Response(
-    #            {'detail': 'Рецепт успешно удален из избранного.!'},
-    #            status=status.HTTP_204_NO_CONTENT)
-
-#  def favorite(self, request, pk):
-        # recipe = get_object_or_404(Recipe, pk=pk)
-
-        # if self.request.method == 'POST':
-        #  serializer = FavoriteSerializer(
-        #    data={'user': request.user.id, 'recipe': recipe.id}
-        #  )
-        #  serializer.is_valid(raise_exception=True)
-        #  Favorite.objects.create(user=self.request.user, recipe=recipe)
-        #  favorite_recipe_serializer = FavoriteRecipeSerializer(recipe)
-        #  return Response(
-        #    favorite_recipe_serializer.data,
-        #  status=status.HTTP_201_CREATED)
-
-        # if self.request.method == 'DELETE':
-        #    get_object_or_404(Favorite, user=request.user,
-        #                      recipe=recipe).delete()
-        #  return Response({'detail': 'Рецепт успешно удален из избранного.'},
-        #                    status=status.HTTP_204_NO_CONTENT)
-
-        # get_object_or_404(Favorite, user=self.request.user,
-        #                  recipe=recipe).delete()
-        # return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(detail=True, methods=['post', 'delete'],
             # url_path='shopping_cart',
             # url_name='shopping_cart',
             permission_classes=[IsAuthenticated])
@@ -264,6 +191,79 @@ class RecipeViewSet(viewsets.ModelViewSet):
         #    get_object_or_404(ShoppingList, user=self.request.user,
         #                      recipe=recipe).delete()
         #    return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['post', 'delete'],
+            url_path='favorite', url_name='favorite',
+            permission_classes=[IsAuthenticated])
+    def favorite(self, request, **kwargs):
+        recipe = get_object_or_404(Recipe, id=kwargs['pk'])
+        user = get_object_or_404(User, id=request.user.id)
+
+        if request.method == 'POST':
+            serializer = FavoriteSerializer(
+                data={'user': user.id, 'recipe': recipe.id})
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            # Favorite.objects.create(user=request.user, recipe=recipe)
+            return Response(serializer.data,
+                            status=status.HTTP_201_CREATED)
+
+        if request.method == 'DELETE':
+            get_object_or_404(Favorite, user=request.user,
+                              recipe=recipe).delete()
+            return Response({'detail': 'Рецепт успешно удален из избранного!'},
+                            status=status.HTTP_204_NO_CONTENT)
+
+        # recipe = get_object_or_404(Recipe, id=pk)
+        # if request.method == 'POST':
+        #    return create_model_instance(request, recipe, FavoriteSerializer)
+
+        # if request.method == 'DELETE':
+        #    error_message = 'Рецепт удален из избранного!'
+        #    return delete_model_instance(request, Favorite,
+        #                                 recipe, error_message)
+    # def favorite(self, request, **kwargs):
+    #    recipe = get_object_or_404(Recipe, id=kwargs['pk'])
+    #    if request.method == 'POST':
+    #        serializer = FavoriteRecipeSerializer(
+    #            recipe, data=request.data, context={'request': request})
+    #        serializer.is_valid(raise_exception=True)
+    # if not Favorite.objects.filter(user=request.user,
+    # recipe=recipe).exists():
+    #        Favorite.objects.create(user=request.user, recipe=recipe)
+    # avorite_recipe_serializer = FavoriteRecipeSerializer(recipe)
+    #        return Response(serializer.data,
+    #                        status=status.HTTP_201_CREATED)
+    #    if request.method == 'DELETE':
+    #        get_object_or_404(Favorite, user=request.user,
+    #                          recipe=recipe).delete()
+    #        return Response(
+    #            {'detail': 'Рецепт успешно удален из избранного.!'},
+    #            status=status.HTTP_204_NO_CONTENT)
+
+#  def favorite(self, request, pk):
+        # recipe = get_object_or_404(Recipe, pk=pk)
+
+        # if self.request.method == 'POST':
+        #  serializer = FavoriteSerializer(
+        #    data={'user': request.user.id, 'recipe': recipe.id}
+        #  )
+        #  serializer.is_valid(raise_exception=True)
+        #  Favorite.objects.create(user=self.request.user, recipe=recipe)
+        #  favorite_recipe_serializer = FavoriteRecipeSerializer(recipe)
+        #  return Response(
+        #    favorite_recipe_serializer.data,
+        #  status=status.HTTP_201_CREATED)
+
+        # if self.request.method == 'DELETE':
+        #    get_object_or_404(Favorite, user=request.user,
+        #                      recipe=recipe).delete()
+        #  return Response({'detail': 'Рецепт успешно удален из избранного.'},
+        #                    status=status.HTTP_204_NO_CONTENT)
+
+        # get_object_or_404(Favorite, user=self.request.user,
+        #                  recipe=recipe).delete()
+        # return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=['get'],
             permission_classes=[IsAuthenticated])
