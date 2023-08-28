@@ -391,21 +391,21 @@ class SubscribeSerializer(UserSerializer):
         return obj.recipes.count()
 
 
-# class FavoriteSerializer(serializers.ModelSerializer):
+class FavoriteSerializer(serializers.ModelSerializer):
 
-#    class Meta:
-#        model = Favorite
-#        fields = (
-#            'user',
-#            'recipe',
-#        )
-#        validators = (
-#            serializers.UniqueTogetherValidator(
-#                queryset=Favorite.objects.all(),
-#                fields=('user', 'recipe'),
-#                message='Рецепт уже в избранном!'
-#            ),
-#        )
+    class Meta:
+        model = Favorite
+        fields = (
+            'user',
+            'recipe',
+        )
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=Favorite.objects.all(),
+                fields=('user', 'recipe'),
+                message='Рецепт уже в избранном!'
+            )
+        ]
 
 #    def to_representation(self, instance):
 #        request = self.context.get('request')
@@ -471,21 +471,21 @@ class SubscribeSerializer(UserSerializer):
         # ]
 
 
-# class ShoppingCartSerializer(serializers.ModelSerializer):
+class ShoppingCartSerializer(serializers.ModelSerializer):
 
-#    class Meta:
-#        model = ShoppingList
-#        fields = (
-#            'user',
-#            'recipe',
-#        )
-#        validators = (
-#            serializers.UniqueTogetherValidator(
-#                queryset=ShoppingList.objects.all(),
-#                fields=('user', 'recipe'),
-#                message='Рецепт уже в списке покупок!'
-#            ),
-#        )
+    class Meta:
+        model = ShoppingList
+        fields = (
+            'user',
+            'recipe',
+        )
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=ShoppingList.objects.all(),
+                fields=('user', 'recipe'),
+                message='Рецепт уже добавлен в список покупок!'
+            )
+        ]
 
 #    def to_representation(self, instance):
 #        request = self.context.get('request')
