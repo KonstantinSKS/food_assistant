@@ -256,41 +256,15 @@ class RecipeReadOnlySerializer(serializers.ModelSerializer):
         if self.context.get('request').user.is_authenticated:
             return Favorite.objects.filter(
                 user=self.context['request'].user,
-                recipe=obj
-            ).exists()
+                recipe=obj).exists()
         return False
-        # return (
-        #    self.context.get('request').user.is_authenticated
-        #    and Favorite.objects.filter(user=self.context['request'].user,
-        #                                recipe=obj).exists()
-        # )
-
-        # user = self.context['request'].user
-        # if user.is_authenticated:
-        #    return user.favorites.filter(recipe=obj).exists()
-        # return False
-        # user = self.context.get('request').user
-        #  if not user.is_anonymous:
 
     def get_is_in_shopping_cart(self, obj):
         if self.context.get('request').user.is_authenticated:
             return ShoppingList.objects.filter(
                 user=self.context['request'].user,
-                recipe=obj
-            ).exists()
+                recipe=obj).exists()
         return False
-        # return (
-        #    self.context.get('request').user.is_authenticated
-        #    and ShoppingList.objects.filter(
-        #        user=self.context['request'].user,
-        #        recipe=obj).exists()
-        # )
-        # user = self.context['request'].user
-        # if user.is_authenticated:
-        # return user.shoppinglist.filter(recipe=obj).exists()
-        # return False
-# user = self.context.get('request').user
-        # if not user.is_anonymous:
 
 
 class FavoriteRecipeSerializer(serializers.ModelSerializer):
@@ -303,14 +277,6 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
             'image',
             'cooking_time'
         )
-
-    # def validate(self, obj):
-    #    recipe = self.instance
-    #    if not Favorite.objects.filter(user=self.context['request'].user,
-    #                                   recipe=recipe).exists():
-    #        raise serializers.ValidationError(
-    #            {'errors': 'Рецепт уже в избранном!'})
-    #    return obj
 
 
 class SubscriptionSerializer(UserSerializer):
@@ -407,69 +373,6 @@ class FavoriteSerializer(serializers.ModelSerializer):
             )
         ]
 
-#    def to_representation(self, instance):
-#        request = self.context.get('request')
-#        return FavoriteRecipeSerializer(
-#            instance.recipe,
-#            context={'request': request}).data
-
-
-# class FavoriteSerializer(serializers.ModelSerializer):
-
-#    class Meta:
-#        model = Favorite
-#        fields = (
-#            'user',
-#            'recipe'
-#        )
-#        validators = [
-#            serializers.UniqueTogetherValidator(
-#                queryset=Favorite.objects.all(),
-#                fields=('user', 'recipe'),
-#                message='Рецепт уже в избранном!'
-#            )
-#        ]
-
-#    def to_representation(self, instance):
-#        request = self.context.get('request')
-#        return FavoriteRecipeSerializer(
-#            instance.recipe,
-#            context={'request': request}).data
-
-    # def validate(self, obj):
-    #   recipe = self.instance
-        # user = self.context['request'].user
-        # if recipe.favorites.exists():
-    #    if not Favorite.objects.filter(user=self.context['request'].user,
-    #                                   recipe=recipe).exists():
-    #        raise serializers.ValidationError(
-    #            {'errors': 'Рецепт уже в избранном!'})
-    #    return obj  # if (self.context['request'].recipe == obj):
-
-    # def validate(self, data):
-    #    user = data['user']
-    #    recipe = data['recipe']
-    #    action = self.context['action']
-    #    recipe_in_favorites = Favorite.objects.filter(
-    #        recipe=recipe,
-    #        user=user
-    #    )
-    #    if action == 'remove':
-    #        recipe_in_favorites.delete()
-    #    elif action == 'add':
-    #        if recipe_in_favorites:
-    #            raise serializers.ValidationError(
-    #                detail='Рецепт уже в избранном!')
-    #    return data
-
-        # validators = [
-        #    serializers.UniqueTogetherValidator(
-        #        queryset=Favorite.objects.all(),
-        #        fields=('user', 'recipe'),
-        #        message='Рецепт уже в избранном!'
-        #    )
-        # ]
-
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
 
@@ -486,79 +389,3 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
                 message='Рецепт уже добавлен в список покупок!'
             )
         ]
-
-#    def to_representation(self, instance):
-#        request = self.context.get('request')
-#        return FavoriteRecipeSerializer(
-#            instance.recipe,
-#            context={'request': request}).data
-
-#    class Meta:
-#        model = ShoppingList
-#        fields = (
-#            'user',
-#            'recipe'
-#        )
-#        validators = [
-#            serializers.UniqueTogetherValidator(
-#                queryset=ShoppingList.objects.all(),
-#                fields=('user', 'recipe'),
-#                message='Рецепт уже в списке покупок!'
-#            )
-#        ]
-
-#    def to_representation(self, instance):
-#        request = self.context.get('request')
-#        return FavoriteRecipeSerializer(
-#            instance.recipe,
-#            context={'request': request}).data
-
-    # def validate(self, obj):
-    #    recipe = self.instance
-    #    if not ShoppingList.objects.filter(user=self.context['request'].user,
-    #                                       recipe=recipe).exists():
-    #        raise serializers.ValidationError(
-    #            {'errors': 'Рецепт уже в списке покупок!'})
-    #    return obj
-
-    # user = serializers.ReadOnlyField()
-    # recipe = serializers.ReadOnlyField()
-
-    # class Meta:
-    #    model = ShoppingList
-    #    fields = (
-    #        'user',
-    #        'recipe'
-    #    )
-
-    # def validate(self, obj):
-    #    recipe = self.instance
-        # user = self.context['request'].user
-    #    if recipe.shoppinglist.exists():
-    #        raise serializers.ValidationError(
-    #            {'errors': 'Рецепт уже в списке покупок!'})
-    #    return obj  # if (self.context['request'].recipe == obj):
-
-    # def validate(self, data):
-    #    user = data['user']
-    #    recipe = data['recipe']
-    #    action = self.context['action']
-    #    recipe_in_sh_cart = ShoppingList.objects.filter(
-    #        recipe=recipe,
-    #        user=user
-    #    )
-    #    if action == 'remove':
-    #        recipe_in_sh_cart.delete()
-    #    elif action == 'add':
-    #        if recipe_in_sh_cart:
-    #            raise serializers.ValidationError(
-    #                detail='Рецепт уже добавлен в список покупок!')
-    #    return data
-
-    # validators = [
-    #    serializers.UniqueTogetherValidator(
-    #        queryset=ShoppingList.objects.all(),
-    #        fields=('user', 'recipe'),
-    #        message='Рецепт уже добавлен в список покупок!'
-    #    )
-    # ]
