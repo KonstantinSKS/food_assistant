@@ -1,4 +1,4 @@
-# Foodgram project
+# Food_assistant project
 ## Проект Продуктовый помощник
 
 ## Описание:
