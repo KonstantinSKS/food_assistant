@@ -16,20 +16,9 @@
 - PostgreSQL 13.0
 - nginx
 
-## Проект доступен по ссылкам:
-```
-https://zeleboba.servebeer.com/
-```
-```
-https://zeleboba.servebeer.com/admin/
-```
-```
-https://zeleboba.servebeer.com/api/docs/
-```
-
 ## Данные для администратора:
 - логин: admin
-- почта: konstantin@yandex.ru 
+- почта: example_user@example.com
 - пароль: 555Sobaka555
 
 #
